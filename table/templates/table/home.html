@@ -1,0 +1,115 @@
+{% extends 'table/base.html' %}
+
+{% block title %}Classification of Academic Journals{% endblock %}
+
+<!-- We get rid of the content in these blocks -->
+{% block navbar %}{% endblock %}
+{% block settings_button %}{% endblock %}
+{% block settings %}{% endblock %}
+{% block tabs %}{% endblock %}
+{% block results_info %}{% endblock %}
+{% block pagination %}{% endblock %}
+
+{% block heading %}
+<h1 class="display-1 fw-normal text-center my-5">Classification of Academic Journals</h1>
+{% endblock %}
+
+{% block content %}
+<h2 class="display-6 text-center">Find the best source for your research</h2>
+
+<div class="row my-5 pt-5">
+    <div class="col-8 py-5">
+        <div class="container">
+            <div class="row">
+                <p class="fs-4">
+                    Classification of Academic Journals aims to make research easier for you by bringing all
+                    publications in a single place.
+                </p>
+            </div>
+
+            <div class="row my-5">
+                <h3>How does it work?</h3>
+                <p class="fs-5">
+                    We display data about journals in <span class="text-warning">tables</span>, making it easy to sort
+                    and filter for any kind of information you might be looking for.
+                </p>
+
+                <p class="fs-5 mt-2">
+                    For now, the data we have is limited to what
+                    <a class="link-primary" href="https://uefiscdi.gov.ro/scientometrie-baze-de-date"
+                        data-bs-toggle="tooltip" target="_blank"
+                        data-bs-title="Unitatea Executivă pentru Finanțarea Învățământului Superior, a Cercetării, Dezvoltării și Inovării">
+                        UEFISCDI</a>
+                    offers, but we are looking forward to expand and extract data from multiple sources.
+                </p>
+            </div>
+
+            <div class="row my-5">
+                <h3>What else is there?</h3>
+                <p class="fs-5">
+                    We are also providing a set of useful <span class="text-danger">charts</span>, in case you are
+                    looking for statistic data about journals or categories.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-4 px-4">
+        <div class="container">
+            <div class="row">
+                <h3>Give it a go</h3>
+
+                <div class="list-group">
+                    <a href="{% url 'table:ahci' %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Arts & Humanities Citation Index</h5>
+                            <i class="bi bi-arrow-right-circle-fill fs-4"></i>
+                        </div>
+
+                        <p class="mb-1">A citation index derived from Clarivate's Current Contents.</p>
+                        <small>Referred to as "AHCI"</small>
+                    </a>
+
+                    <a href="{% url 'table:erih' %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">European Reference Index for the Humanities</h5>
+                            <i class="bi bi-arrow-right-circle-fill fs-4"></i>
+                        </div>
+
+                        <p class="mb-1">An index from Norwegian Directorate for Higher Education and Skills.</p>
+                        <small class="text-body-secondary">Referred to as "ERIH"</small>
+                    </a>
+
+                    <a href="{% url 'table:jcr_scores' %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Journal Citation Reports</h5>
+                            <i class="bi bi-arrow-right-circle-fill fs-4"></i>
+                        </div>
+
+                        <p class="mb-1">An annual publication by Clarivate.</p>
+                        <small class="text-body-secondary">Referred to as "JCR"</small>
+                    </a>
+                </div>
+            </div>
+
+            <div class="row my-5">
+                <h3>Charts</h3>
+
+                <div class="list-group">
+                    <a href="{% url 'charts:ahci' %}" class="list-group-item list-group-item-action">
+                        Arts & Humanities Citation Index
+                    </a>
+
+                    <a href="{% url 'charts:erih' %}" class="list-group-item list-group-item-action">
+                        European Reference Index for the Humanities
+                    </a>
+
+                    <a href="{% url 'charts:jcr_scores' %}" class="list-group-item list-group-item-action">
+                        Journal Citation Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'table/base.html' %}
+
+{% block title %}Journal Citation Reports{% endblock %}
+
+{% block heading %}{% endblock %}
+
+{% block tabs %}{% endblock %}
+
+{% block content %}
+{% if journal %}
+<h1 class="display-4">{{ journal.title }}</h1>
+<h1><span class="badge bg-secondary">{{ journal.issn }}</span></h1>
+
+<div class="row my-5">
+    <div class="col-8">
+        {% if jcrscoremore_data %}
+        <div class="container">
+            <p class="lead fs-4 my-5">The following data is available for this journal:</p>
+
+            <table class="table table-borderless table-hover">
+                <thead class="user-select-none">
+                    <tr>
+                        <th>YEAR</th>
+                        <th>INDEX</th>
+                        <th>CATEGORY</th>
+                        <th>QUARTILE</th>
+                    </tr>
+                </thead>
+
+                <tbody class="table-group-divider">
+                    {% for item in jcrscoremore_data %}
+                    <tr>
+                        <td>{{ item.year }}</td>
+                        <td>{{ item.index }}</td>
+                        <td>{{ item.category.category }}</td>
+                        <td>{{ item.quartile }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if jcrgroup_data %}
+        <div class="container my-5">
+            <h1>Groups</h1>
+
+            <table class="table table-borderless table-hover">
+                <thead class="user-select-none">
+                    <tr>
+                        <th>YEAR</th>
+                        <th>TYPE</th>
+                        <th>INDEX</th>
+                        <th>CATEGORY</th>
+                        <th>ZONE</th>
+                        <th>TOP</th>
+                    </tr>
+                </thead>
+
+                <tbody class="table-group-divider">
+                    {% for item in jcrgroup_data %}
+                    {% if item.zone == 1 %}
+                    <tr class="table-danger">
+                        <td>{{ item.year }}</td>
+                        <td>{{ item.type }}</td>
+                        <td>{{ item.index }}</td>
+                        <td>{{ item.category.category }}</td>
+                        <td>{{ item.zone }}</td>
+                        <td>{{ item.top }}</td>
+                    </tr>
+                    {% elif item.zone == 2 %}
+                    <tr class="table-warning">
+                        <td>{{ item.year }}</td>
+                        <td>{{ item.type }}</td>
+                        <td>{{ item.index }}</td>
+                        <td>{{ item.category.category }}</td>
+                        <td>{{ item.zone }}</td>
+                        <td>{{ item.top }}</td>
+                    </tr>
+                    {% else%}
+                    <tr>
+                        <td>{{ item.year }}</td>
+                        <td>{{ item.type }}</td>
+                        <td>{{ item.index }}</td>
+                        <td>{{ item.category.category }}</td>
+                        <td>{{ item.zone }}</td>
+                        <td>{{ item.top }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-4">
+        {% if jcrscore_data %}
+        <div class="container">
+            <h2>Scores</h2>
+
+            <div class="container border py-4">
+                <div class="row text-center fw-bold">
+                    <div class="col">YEAR</div>
+                    <div class="col">AIS</div>
+                    <div class="col">RIS</div>
+                    <div class="col">RIF</div>
+                </div>
+
+                {% for item in jcrscore_data %}
+                <div class="row text-center">
+                    <div class="col">{{ item.year }}</div>
+                    <div class="col">{{ item.ais }}</div>
+                    <div class="col">{{ item.ris }}</div>
+                    <div class="col">
+                        {% if item.rif != None %}{{ item.rif|stringformat:".3f" }}{% else %}{{ item.rif }}{% endif%}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if ahci_data %}
+        <div class="container my-5">
+            <h3>Also in AHCI</h3>
+
+            <table class="table table-borderless table-hover">
+                <thead class="user-select-none">
+                    <tr>
+                        <th>CATEGORY</th>
+                        <th>YEAR</th>
+                    </tr>
+                </thead>
+
+                <tbody class="table-group-divider">
+                    {% for item in ahci_data %}
+                    <tr>
+                        <td>{{ item.category.category }}</td>
+                        <td>{{ item.year }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if erih_data %}
+        <div class="container">
+            <h3>Also in ERIH</h3>
+
+            <table class="table table-light table-hover">
+                <thead style="position: sticky; top: 56px;" class="user-select-none">
+                    <tr>
+                        <th>TITLE</th>
+                        <th>ISSN</th>
+                        <th>DISCIPLINE</th>
+                        <th>CAT 2007</th>
+                        <th>CAT 2011</th>
+                    </tr>
+                </thead>
+
+                <tbody class="table-group-divider">
+                    {% for item in erih_data %}
+                    <tr>
+                        <td>{{ item.title}}</td>
+                        <td>{{ item.issn }}</td>
+                        <td>{{ item.discipline }}</td>
+                        <td>{{ item.cat_2007 }}</td>
+                        <td>{{ item.cat_2011 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<p class="display-6 text-center">Journal doesn't exist</p>
+
+<div class="alert alert-warning d-flex align-items-center my-5" role="alert">
+    <i class="me-2 bi bi-exclamation-triangle-fill"></i>
+    <div>
+        No results found. <a href="{% url 'table:jcr_scores' %}" class="alert-link">Go back to first page</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

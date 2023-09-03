@@ -1,0 +1,7 @@
+.idea
+database
+tabel
+venv
+db.sqlite3
+__pycache__
+ideas.txt

@@ -1,0 +1,219 @@
+{% extends 'table/base.html' %}
+
+{% block title %}Arts & Humanities Citation Index{% endblock %}
+
+{% block heading %}<h1 class="display-4 text-center">Arts & Humanities Citation Index</h1>{% endblock %}
+
+{% block tabs %}
+<ul class="nav nav-pills justify-content-center my-5">
+    <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="{% url 'table:ahci' %}">Table</a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'charts:ahci' %}">Charts</a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{# url 'ahci_about' #}">About</a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center mb-2">
+    <form class="user-select-none">
+        {% if number_of_results %}
+        <input type="hidden" name="results" value="{{ number_of_results }}">
+        {% endif %}
+
+        <!-- SEARCH GROUP -->
+        <div class="btn-group">
+            <input type="text" class="form-control" id="searchInput" name="search" value="{{ searched_string }}"
+                placeholder="Search something">
+        </div>
+
+        <!-- CATEGORY GROUP -->
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside" aria-expanded="false">
+                Category
+            </button>
+
+            <div class="dropdown-menu overflow-x-hidden overflow-y-scroll p-2" style="height: 50vh; width: 23vw;">
+                <input type="text" class="form-control m-1" id="searchbar" onkeyup="search_category()"
+                    placeholder="Search category">
+
+                <script>
+                    function search_category() {
+                        let input = document.getElementById('searchbar').value
+                        input = input.toLowerCase();
+                        let x = document.getElementsByClassName('btn btn-outline-primary');
+
+                        for (i = 0; i < x.length; i++) {
+                            if (!x[i].innerHTML.toLowerCase().includes(input)) {
+                                x[i].parentElement.style.display = "none";
+                            }
+                            else {
+                                x[i].parentElement.style.display = "block";
+                            }
+                        }
+                    }
+                </script>
+
+                <div class="d-flex flex-wrap">
+                    {% for item in all_categories %}
+                    <div class="form-check p-0 m-1">
+                        <input {% if item in requested_categories %}checked{% endif %} type="checkbox"
+                            class="btn-check dropdown-item " id="categoryToggleInput{{ forloop.counter }}"
+                            name="category" value="{{ item }}" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="categoryToggleInput{{ forloop.counter }}">
+                            {{ item }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- YEAR GROUP -->
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside" aria-expanded="false">
+                Year
+            </button>
+
+            <div class="dropdown-menu px-2">
+                {% for item in all_years %}
+                <div class="form-check">
+                    <input {% if item in requested_years %}checked{% endif %} class="form-check-input" type="checkbox"
+                        name="year" value="{{ item }}" id="yearCheckInput{{ forloop.counter }}">
+                    <label class="form-check-label" for="yearCheckInput{{ forloop.counter }}">
+                        {{ item }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- SORT GROUP -->
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside" aria-expanded="false">
+                Sort
+            </button>
+
+            <div class="dropdown-menu px-2">
+                <div class="form-check">
+                    <input {% if 'journal__title' in requested_sort %}checked{% endif %} class="form-check-input"
+                        type="checkbox" name="sort" value="journal__title" id="titleSortInput1">
+                    <label class="form-check-label" for="titleSortInput1">
+                        Title <i class="bi bi-arrow-up"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if '-journal__title' in requested_sort %}checked{% endif %} class="form-check-input"
+                        type="checkbox" name="sort" value="-journal__title" id="titleSortInput2">
+                    <label class="form-check-label" for="titleSortInput2">
+                        Title <i class="bi bi-arrow-down"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if 'journal__issn' in requested_sort %}checked{% endif %} class="form-check-input"
+                        type="checkbox" name="sort" value="journal__issn" id="issnSortInput1">
+                    <label class="form-check-label" for="issnSortInput1">
+                        ISSN <i class="bi bi-arrow-up"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if '-journal__issn' in requested_sort %}checked{% endif %} class="form-check-input"
+                        type="checkbox" name="sort" value="-journal__issn" id="issnSortInput2">
+                    <label class="form-check-label" for="issnSortInput2">
+                        ISSN <i class="bi bi-arrow-down"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if 'category__category' in requested_sort %}checked{% endif %} class="form-check-input"
+                        type="checkbox" name="sort" value="category__category" id="categorySortInput1">
+                    <label class="form-check-label" for="categorySortInput1">
+                        Category <i class="bi bi-arrow-up"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if '-category__category' in requested_sort %}checked{% endif %} class="form-check-input"
+                        type="checkbox" name="sort" value="-category__category" id="categorySortInput2">
+                    <label class="form-check-label" for="categorySortInput2">
+                        Category <i class="bi bi-arrow-down"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if 'year' in requested_sort %}checked{% endif %} class="form-check-input" type="checkbox"
+                        name="sort" value="year" id="yearSortInput1">
+                    <label class="form-check-label" for="yearSortInput1">
+                        Year <i class="bi bi-arrow-up"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if '-year' in requested_sort %}checked{% endif %} class="form-check-input" type="checkbox"
+                        name="sort" value="-year" id="yearSortInput2">
+                    <label class="form-check-label" for="yearSortInput2">
+                        Year <i class="bi bi-arrow-down"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-group"><button class="btn btn-success" type="submit">Search</button></div>
+
+        <!-- CLEAR FILTERS GROUP -->
+        {% if filters_are_applied %}
+        <div class="btn-group">
+            <a href="{{ request.path }}{% if 'results' in request.GET %}?results={{ number_of_results }}{% endif %}"
+                class="btn btn-outline-dark">
+                Clear filters <i class="bi bi-x-lg"></i>
+            </a>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+{% if data %}
+<table class="table table-light table-hover"><!-- user-select-none -->
+    <thead style="position: sticky; top: 56px;" class="user-select-none">
+        <tr>
+            <th>TITLE</th>
+            <th>ISSN</th>
+            <th>CATEGORY</th>
+            <th>YEAR</th>
+        </tr>
+    </thead>
+
+    <tbody class="table-group-divider">
+        {% for record in data %}
+        <tr>
+            <td>{{ record.journal.title }}</td>
+            <td>{{ record.journal.issn }}</td>
+            <td>{{ record.category.category }}</td>
+            <td>{{ record.year }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-center">No results</p>
+
+<div class="alert alert-warning d-flex align-items-center" role="alert">
+    <i class="me-2 bi bi-exclamation-triangle-fill"></i>
+    <div>
+        No results found. <a href="{{ first_page }}" class="alert-link">Go back to first page</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

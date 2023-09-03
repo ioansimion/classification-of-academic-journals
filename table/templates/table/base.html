@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Base template block title{% endblock %}</title>
+
+    <!-- CDN Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+
+    <!-- CDN Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+
+<body class="pt-5">
+    {% block navbar %}
+    <header>
+        <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'table:home' %}">Classification of Academic Journals</a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'table:ahci' %}">AHCI</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'table:erih' %}">ERIH</a>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="{% url 'table:jcr_scores' %}" id="navbarDropdown"
+                                role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Journal Citation Reports
+                            </a>
+
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'table:jcr_scores' %}">
+                                        Exact numbers
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'table:jcr_scores_more' %}">
+                                        More exact numbers
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'table:jcr_groups' %}">
+                                        Red and yellow groups
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <!-- <form class="d-flex">
+                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success" type="submit">
+                            Search
+                        </button>
+                    </form> -->
+
+                    {% block settings_button %}
+                    <!-- Offcanvas settings button -->
+                    <button class="btn btn-dark ms-lg-2" type="button" data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">
+                        <i class="bi bi-gear"></i>
+                    </button>
+                    {% endblock %}
+                </div>
+            </div>
+        </nav>
+    </header>
+    {% endblock %}
+
+    <!-- Offcanvas content -->
+    {% block settings %}
+    <nav class="offcanvas offcanvas-end text-bg-dark" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions"
+        aria-labelledby="offcanvasWithBothOptionsLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Settings</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+                aria-label="Close"></button>
+        </div>
+
+        <div class="offcanvas-body">
+            <form class="col-5"><!-- Defaults action to current page and method="get" -->
+                <div class="form-floating">
+                    <input type="number" id="numberOfResultsInput" name="results" min="1" class="form-control"
+                        aria-label="Text input with dropdown button" value="{{ number_of_results }}">
+                    <label for="numberOfResultsInput">Number of results</label>
+                </div>
+
+                <!-- HIDDEN INPUTS FOR SEARCH -->
+                {% if searched_string %}
+                <input type="hidden" name="search" value="{{ searched_string }}">
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR PAGE -->
+                {% if requested_page %}
+                <input type="hidden" name="page" value="{{ requested_page }}">
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR TYPES -->
+                {% if requested_types %}
+                {% for item in requested_types %}
+                <input type="hidden" name="type" value="{{ item }}">
+                {% endfor %}
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR INDEXES -->
+                {% if requested_indexes %}
+                {% for item in requested_indexes %}
+                <input type="hidden" name="index" value="{{ item }}">
+                {% endfor %}
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR CATEGORIES -->
+                {% if requested_categories %}
+                {% for item in requested_categories %}
+                <input type="hidden" name="category" value="{{ item }}">
+                {% endfor %}
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR QUARTILES -->
+                {% if requested_quartiles %}
+                {% for item in requested_quartiles %}
+                <input type="hidden" name="quartile" value="{{ item }}">
+                {% endfor %}
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR AIS_MIN -->
+                {% if requested_ais_min %}
+                <input type="hidden" name="ais_min" value="{{ requested_ais_min }}">
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR AIS_MAX -->
+                {% if requested_ais_max %}
+                <input type="hidden" name="ais_max" value="{{ requested_ais_max }}">
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR RIS_MIN -->
+                {% if requested_ris_min %}
+                <input type="hidden" name="ris_min" value="{{ requested_ris_min }}">
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR RIS_MAX -->
+                {% if requested_ris_max %}
+                <input type="hidden" name="ris_max" value="{{ requested_ris_max }}">
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR RIF_MIN -->
+                {% if requested_rif_min %}
+                <input type="hidden" name="rif_min" value="{{ requested_rif_min }}">
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR RIF_MAX -->
+                {% if requested_rif_max %}
+                <input type="hidden" name="rif_max" value="{{ requested_rif_max }}">
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR ZONES -->
+                {% if requested_zones %}
+                {% for item in requested_zones %}
+                <input type="hidden" name="zone" value="{{ item }}">
+                {% endfor %}
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR YEARS -->
+                {% if requested_years %}
+                {% for item in requested_years %}
+                <input type="hidden" name="year" value="{{ item }}">
+                {% endfor %}
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR DISCIPLINES -->
+                {% if requested_disciplines %}
+                {% for item in requested_disciplines %}
+                <input type="hidden" name="discipline" value="{{ item }}">
+                {% endfor %}
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR CAT_2007 -->
+                {% if requested_cat_2007 %}
+                {% for item in requested_cat_2007 %}
+                <input type="hidden" name="cat_2007" value="{{ item }}">
+                {% endfor %}
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR CAT_2011 -->
+                {% if requested_cat_2011 %}
+                {% for item in requested_cat_2011 %}
+                <input type="hidden" name="cat_2011" value="{{ item }}">
+                {% endfor %}
+                {% endif %}
+
+                <!-- HIDDEN INPUTS FOR SORTS -->
+                {% if requested_sort %}
+                {% for item in requested_sort %}
+                <input type="hidden" name="sort" value="{{ item }}">
+                {% endfor %}
+                {% endif %}
+            </form>
+        </div>
+    </nav>
+    {% endblock %}
+
+    <main class="container my-5 min-vh-100">
+        {% block heading %}<p>Base template block heading</p>{% endblock %}
+
+        {% block tabs %}<p>Base template block tabs</p>{% endblock %}
+
+        {% block content %}<p>Base template block content</p>{% endblock %}
+
+        {% block results_info %}
+        {% if data %}
+        <div class="lh-1">
+            <p class="text-end">{{ data.count }} on this page</p>
+            <p class="text-end">Found {{ total_results }} results</p>
+        </div>
+        {% endif %}
+        {% endblock %}
+
+        {% block pagination %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-lg justify-content-center">
+                {% if requested_page > 3 and total_pages > 5 %}
+                <li class="page-item">
+                    <a class="page-link px-2" href="{{ first_page }}" aria-label="First page">
+                        <i class="bi bi-chevron-bar-left"></i>
+                    </a>
+                </li>
+
+                <li class="page-item">
+                    <a class="page-link" href="{{ previous_page }}" aria-label="Previous page">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for page, link in pages_links %}
+                <li class="page-item {% if requested_page == page %}active{% endif %}">
+                    <a class="page-link" href="{{ link }}">{{ page }}</a>
+                </li>
+                {% endfor %}
+
+                <!-- Solved document formatting by putting template tag in a html comment -->
+                <!-- {% if requested_page < total_pages|add:'-2' and total_pages > 5 %} -->
+                <li class="page-item">
+                    <a class="page-link" href="{{ next_page }}" aria-label="Next page">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+
+                <li class="page-item">
+                    <a class="page-link px-2" href="{{ last_page }}" aria-label="Last page">
+                        <i class="bi bi-chevron-bar-right"></i>
+                    </a>
+                </li>
+                {% else %}-->
+                {% endif %}
+            </ul>
+        </nav>
+        {% endblock %}
+    </main>
+
+    <footer class="mt-auto pt-5 text-bg-dark">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <a class="h5 link-light link-opacity-50 link-underline-opacity-0" href="{% url 'table:ahci' %}">
+                        Arts & Humanities Citation Index
+                    </a>
+
+                    <ul class="list-unstyled">
+                        <li class="my-1">
+                            <a class="fw-light link-light link-opacity-50 link-underline-opacity-0"
+                                href="{% url 'table:ahci' %}">
+                                Table
+                            </a>
+                        </li>
+
+                        <li class="my-1">
+                            <a class="fw-light link-light link-opacity-50 link-underline-opacity-0"
+                                href="{% url 'charts:ahci' %}">
+                                Charts
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col">
+                    <a class="h5 link-light link-opacity-50 link-underline-opacity-0"
+                        href="{% url 'table:jcr_scores' %}">
+                        Journal Citation Reports
+                    </a>
+
+                    <ul class="list-unstyled">
+                        <li class="my-1">
+                            <a class="fw-light link-light link-opacity-50 link-underline-opacity-0"
+                                href="{% url 'table:jcr_scores' %}">
+                                Exact numbers
+                            </a>
+                        </li>
+
+                        <li class="my-1">
+                            <a class="fw-light link-light link-opacity-50 link-underline-opacity-0"
+                                href="{% url 'table:jcr_scores_more' %}">
+                                More exact numbers
+                            </a>
+                        </li>
+
+                        <li class="my-1">
+                            <a class="fw-light link-light link-opacity-50 link-underline-opacity-0"
+                                href="{% url 'table:jcr_groups' %}">
+                                Red and yellow groups
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col">
+                    <h5 class="bold">More</h5>
+
+                    <a class="fw-light link-light link-opacity-50 link-underline-opacity-0"
+                        href="{% url 'table:erih' %}">
+                        European Reference Index for the Humanities
+                    </a>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <figure>
+                    <blockquote class="blockquote">
+                        <p>
+                            A website made with
+                            <a class="h3 link-light link-underline-opacity-0 link-underline-opacity-75-hover"
+                                href="https://www.djangoproject.com/" target="_blank">
+                                Django
+                            </a>and
+                            <a class="h3 link-light link-underline-opacity-0 link-underline-opacity-75-hover"
+                                href="https://getbootstrap.com/" target="_blank">
+                                Bootstrap
+                            </a>
+                        </p>
+                    </blockquote>
+
+                    <figcaption class="blockquote-footer">
+                        by Simion Ioan-Simion
+                    </figcaption>
+                </figure>
+            </div>
+        </div>
+    </footer>
+
+    <!-- CDN Bootstrap JavaScript bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous">
+        </script>
+
+    <!-- Initialize tooltips -->
+    <script>
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    </script>
+</body>
+
+</html>

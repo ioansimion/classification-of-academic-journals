@@ -1,0 +1,306 @@
+{% extends 'table/base.html' %}
+
+{% block title %}Journal Citation Reports{% endblock %}
+
+{% block heading %}
+<h1 class="display-4 text-center">Journal Citation Reports</h1>
+
+<p class="text-center lead">
+    Exact numbers
+</p>
+{% endblock %}
+
+{% block tabs %}
+<ul class="nav nav-pills justify-content-center my-5">
+    <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="{% url 'table:jcr_scores' %}">Table</a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'charts:jcr_scores' %}">Charts</a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{# url 'jcr_scores_about' #}">About</a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center mb-2">
+    <form class="user-select-none">
+        {% if number_of_results %}
+        <input type="hidden" name="results" value="{{ number_of_results }}">
+        {% endif %}
+
+        <!-- SEARCH GROUP -->
+        <div class="btn-group">
+            <input type="text" class="form-control" id="searchInput" name="search" value="{{ searched_string }}"
+                placeholder="Search something">
+        </div>
+
+        <!-- AIS GROUP -->
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside" aria-expanded="false">
+                AIS
+            </button>
+
+            <div class="dropdown-menu p-2" style="width: 13vw;">
+                <div class="row">
+                    <div class="col">
+                        <input {% if requested_ais_min %}value="{{ requested_ais_min }}" {% endif %} type="number"
+                            name="ais_min" class="form-control" id="aisMinInput" min="0" max="57">
+                        <label class="form-label" for="aisMinInput">Min</label>
+                    </div>
+
+                    <div class="col">
+                        <input {% if requested_ais_max %}value="{{ requested_ais_max }}" {% endif %} type="number"
+                            name="ais_max" class="form-control" id="aisMaxInput" min="0" max="57">
+                        <label class="form-label" for="aisMaxInput">Max</label>
+                    </div>
+                </div>
+
+                <div class="form-check">
+                    <input {% if 'ais' in requested_sort %}checked{% endif %} class="form-check-input" type="checkbox"
+                        name="sort" value="ais" id="aisSortInput1">
+                    <label class="form-check-label" for="aisSortInput1">
+                        Ascending <i class="bi bi-arrow-up"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if '-ais' in requested_sort %}checked{% endif %} class="form-check-input" type="checkbox"
+                        name="sort" value="-ais" id="aisSortInput2">
+                    <label class="form-check-label" for="aisSortInput2">
+                        Descending <i class="bi bi-arrow-down"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIS GROUP -->
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside" aria-expanded="false">
+                RIS
+            </button>
+
+            <div class="dropdown-menu p-2" style="width: 13vw;">
+                <div class="row">
+                    <div class="col">
+                        <input {% if requested_ris_min %}value="{{ requested_ris_min }}" {% endif %} type="number"
+                            name="ris_min" class="form-control" id="risMinInput" min="0" max="80">
+                        <label class="form-label" for="risMinInput">Min</label>
+                    </div>
+
+                    <div class="col">
+                        <input {% if requested_ris_max %}value="{{ requested_ris_max }}" {% endif %} type="number"
+                            name="ris_max" class="form-control" id="risMaxInput" min="0" max="80">
+                        <label class="form-label" for="risMaxInput">Max</label>
+                    </div>
+                </div>
+
+                <div class="form-check">
+                    <input {% if 'ris' in requested_sort %}checked{% endif %} class="form-check-input" type="checkbox"
+                        name="sort" value="ris" id="risSortInput1">
+                    <label class="form-check-label" for="risSortInput1">
+                        Ascending <i class="bi bi-arrow-up"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if '-ris' in requested_sort %}checked{% endif %} class="form-check-input" type="checkbox"
+                        name="sort" value="-ris" id="risSortInput2">
+                    <label class="form-check-label" for="risSortInput2">
+                        Descending <i class="bi bi-arrow-down"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIF GROUP -->
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside" aria-expanded="false">
+                RIF
+            </button>
+
+            <div class="dropdown-menu p-2" style="width: 13vw;">
+                <div class="row">
+                    <div class="col">
+                        <input {% if requested_rif_min %}value="{{ requested_rif_min }}" {% endif %} type="number"
+                            name="rif_min" class="form-control" id="rifMinInput" min="0" max="61">
+                        <label class="form-label" for="rifMinInput">Min</label>
+                    </div>
+
+                    <div class="col">
+                        <input {% if requested_rif_max %}value="{{ requested_rif_max }}" {% endif %} type="number"
+                            name="rif_max" class="form-control" id="rifMaxInput" min="0" max="61">
+                        <label class="form-label" for="rifMaxInput">Max</label>
+                    </div>
+                </div>
+
+                <div class="form-check">
+                    <input {% if 'rif' in requested_sort %}checked{% endif %} class="form-check-input" type="checkbox"
+                        name="sort" value="rif" id="rifSortInput1">
+                    <label class="form-check-label" for="rifSortInput1">
+                        Ascending <i class="bi bi-arrow-up"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if '-rif' in requested_sort %}checked{% endif %} class="form-check-input" type="checkbox"
+                        name="sort" value="-rif" id="rifSortInput2">
+                    <label class="form-check-label" for="rifSortInput2">
+                        Descending <i class="bi bi-arrow-down"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- YEAR GROUP -->
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside" aria-expanded="false">
+                Year
+            </button>
+
+            <div class="dropdown-menu p-2">
+                <div class="form-check">
+                    <input {% if 'year' in requested_sort %}checked{% endif %} class="form-check-input" type="checkbox"
+                        name="sort" value="year" id="yearSortInput1">
+                    <label class="form-check-label" for="yearSortInput1">
+                        Ascending <i class="bi bi-arrow-up"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if '-year' in requested_sort %}checked{% endif %} class="form-check-input" type="checkbox"
+                        name="sort" value="-year" id="yearSortInput2">
+                    <label class="form-check-label" for="yearSortInput2">
+                        Descending <i class="bi bi-arrow-down"></i>
+                    </label>
+                </div>
+
+                {% for item in all_years %}
+                <div class="form-check">
+                    <input {% if item in requested_years %}checked{% endif %} class="form-check-input" type="checkbox"
+                        name="year" value="{{ item }}" id="yearCheckInput{{ forloop.counter }}">
+                    <label class="form-check-label" for="yearCheckInput{{ forloop.counter }}">
+                        {{ item }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- TITLE GROUP -->
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside" aria-expanded="false">
+                Title
+            </button>
+
+            <div class="dropdown-menu p-2">
+                <div class="form-check">
+                    <input {% if 'journal__title' in requested_sort %}checked{% endif %} class="form-check-input"
+                        type="checkbox" name="sort" value="journal__title" id="titleSortInput1">
+                    <label class="form-check-label" for="titleSortInput1">
+                        Ascending <i class="bi bi-arrow-up"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if '-journal__title' in requested_sort %}checked{% endif %} class="form-check-input"
+                        type="checkbox" name="sort" value="-journal__title" id="titleSortInput2">
+                    <label class="form-check-label" for="titleSortInput2">
+                        Descending <i class="bi bi-arrow-down"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ISSN GROUP -->
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside" aria-expanded="false">
+                ISSN
+            </button>
+
+            <div class="dropdown-menu p-2">
+                <div class="form-check">
+                    <input {% if 'journal__issn' in requested_sort %}checked{% endif %} class="form-check-input"
+                        type="checkbox" name="sort" value="journal__issn" id="issnSortInput1">
+                    <label class="form-check-label" for="issnSortInput1">
+                        Ascending <i class="bi bi-arrow-up"></i>
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <input {% if '-journal__issn' in requested_sort %}checked{% endif %} class="form-check-input"
+                        type="checkbox" name="sort" value="-journal__issn" id="issnSortInput2">
+                    <label class="form-check-label" for="issnSortInput2">
+                        Descending <i class="bi bi-arrow-down"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-group"><button class="btn btn-success" type="submit">Search</button></div>
+
+        <!-- CLEAR FILTERS GROUP -->
+        {% if filters_are_applied %}
+        <div class="btn-group">
+            <a href="{{ request.path }}{% if 'results' in request.GET %}?results={{ number_of_results }}{% endif %}"
+                class="btn btn-outline-dark">
+                Clear filters <i class="bi bi-x-lg"></i>
+            </a>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+{% if data %}
+<table class="table table-light table-hover"><!-- user-select-none -->
+    <thead style="position: sticky; top: 56px;" class="user-select-none">
+        <tr>
+            <th>TITLE</th>
+            <th>ISSN</th>
+            <th>AIS</th>
+            <th>RIS</th>
+            <th>RIF</th>
+            <th>YEAR</th>
+            <th class="col-1"></th>
+        </tr>
+    </thead>
+
+    <tbody class="table-group-divider">
+        {% for record in data %}
+        <tr>
+            <td>{{ record.journal.title}}</td>
+            <td>{{ record.journal.issn }}</td>
+            <td>{{ record.ais }}</td>
+            <td>{{ record.ris }}</td>
+            <td>{{ record.rif }}</td>
+            <td>{{ record.year }}</td>
+            <td>
+                <a href="{% url 'table:jcr_journal_detail' record.journal.id %}">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-center">No results</p>
+
+<div class="alert alert-warning d-flex align-items-center" role="alert">
+    <i class="me-2 bi bi-exclamation-triangle-fill"></i>
+    <div>
+        No results found. <a href="{{ first_page }}" class="alert-link">Go back to first page</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

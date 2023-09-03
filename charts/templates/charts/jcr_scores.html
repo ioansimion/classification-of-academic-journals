@@ -1,0 +1,62 @@
+{% extends 'table/base.html' %}
+{% load static %}
+
+{% block settings_button %}{% endblock %}
+{% block settings %}{% endblock %}
+{% block results_info %}{% endblock %}
+{% block pagination %}{% endblock %}
+
+{% block title %}Journal Citation Reports{% endblock %}
+
+{% block heading %}<h1 class="display-4 text-center">Journal Citation Reports</h1>{% endblock %}
+
+{% block tabs %}
+<ul class="nav nav-pills justify-content-center my-5">
+    <li class="nav-item">
+        <a class="nav-link" aria-current="page" href="{% url 'table:jcr_scores' %}">Table</a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'charts:jcr_scores' %}">Charts</a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{# url 'jcr_scores_about' #}">About</a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<!-- APEXCHARTS divs -->
+<div class="row my-5">
+    <div class="col p-3">
+        <h2>Maximum scores each year</h2>
+        <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Provident, eaque temporibus maiores
+            distinctio rerum in alias ad, quam nostrum excepturi delectus veniam et necessitatibus repellat autem
+            repellendus, dignissimos dolore tempora.
+        </p>
+    </div>
+
+    <div class="col-12 rounded-5 bg-body-tertiary shadow p-3" id="apexcharts_div_1"></div>
+</div>
+
+<div class="row my-5">
+    <div class="col p-3">
+        <h2>Average scores each year</h2>
+        <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Provident, eaque temporibus maiores
+            distinctio rerum in alias ad, quam nostrum excepturi delectus veniam et necessitatibus repellat autem
+            repellendus, dignissimos dolore tempora.
+        </p>
+    </div>
+
+    <div class="col-12 rounded-5 bg-body-tertiary shadow p-3" id="apexcharts_div_2"></div>
+</div>
+
+<!-- APEXCHARTS DATA AND SCRIPTS -->
+{{ apexcharts_1|json_script:"apexcharts_1" }}
+{{ apexcharts_2|json_script:"apexcharts_2" }}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="{% static 'charts/jcrscores_apexcharts.js' %}"></script>
+{% endblock %}
