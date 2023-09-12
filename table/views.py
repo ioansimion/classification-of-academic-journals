@@ -20,14 +20,11 @@ def home(request):
     return render(request, "table/home.html", {})
 
 
-def ahci(request):
-    output = {}  # Output is a dictionary
-
+def paginate(request, results, output):
     requested_page = output["requested_page"] = 1  # Initially we are on the first page
     results_start = 0  # So we start at element 0
     results_end = number_of_results = 100  # And we have 100 results per page
 
-    results = Ahci.objects
     copy_of_GET = request.GET.copy()  # We will use this
 
     if request.GET.get("results"):
@@ -45,35 +42,7 @@ def ahci(request):
         results_end = number_of_results * requested_page
         copy_of_GET.pop("page")  # Get rid of the page in GET
 
-    if request.GET.get("search"):
-        searched_string = request.GET.get("search")
-        output["searched_string"] = searched_string
-        results = results.filter(journal__title__icontains=searched_string) |\
-            results.filter(journal__issn__icontains=searched_string) |\
-            results.filter(category__category__icontains=searched_string)
-        output["filters_are_applied"] = True
-
-    if request.GET.get("category"):
-        requested_categories = AhciCategory.objects.filter(category__in=request.GET.getlist("category"))
-        output["requested_categories"] = [item.category for item in requested_categories]
-        results = results.filter(category__in=requested_categories)
-        output["filters_are_applied"] = True
-
-    if request.GET.get("year"):
-        requested_years = request.GET.getlist("year")
-        output["requested_years"] = requested_years
-        results = results.filter(year__in=requested_years)
-        output["filters_are_applied"] = True
-
-    if request.GET.get("sort"):
-        requested_sort = request.GET.getlist("sort")
-        output["requested_sort"] = requested_sort
-        results = results.order_by(*requested_sort)
-        output["filters_are_applied"] = True
-
-    output["all_categories"] = [item.category for item in AhciCategory.objects.all()]
-    output["all_years"] = ['2011', '2012', '2013', '2014', '2015']
-    output["data"] = results.all()[results_start:results_end]  # Rows to display
+    output["data"] = results.all()[results_start:results_end]
     output["total_results"] = f"{results.count():,}"
     total_pages = results.count() // number_of_results + 1
     output["total_pages"] = total_pages
@@ -120,33 +89,52 @@ def ahci(request):
 
     output["pages_links"] = zip(generated_pages, links)
 
+
+def ahci(request):
+    output = {}  # Output is a dictionary
+
+    results = Ahci.objects
+
+    if request.GET.get("search"):
+        searched_string = request.GET.get("search")
+        output["searched_string"] = searched_string
+        results = results.filter(journal__title__icontains=searched_string) |\
+            results.filter(journal__issn__icontains=searched_string) |\
+            results.filter(category__category__icontains=searched_string)
+        output["filters_are_applied"] = True
+
+    if request.GET.get("category"):
+        requested_categories = AhciCategory.objects.filter(category__in=request.GET.getlist("category"))
+        output["requested_categories"] = [item.category for item in requested_categories]
+        results = results.filter(category__in=requested_categories)
+        output["filters_are_applied"] = True
+
+    if request.GET.get("year"):
+        requested_years = request.GET.getlist("year")
+        output["requested_years"] = requested_years
+        results = results.filter(year__in=requested_years)
+        output["filters_are_applied"] = True
+
+    if request.GET.get("sort"):
+        requested_sort = request.GET.getlist("sort")
+        output["requested_sort"] = requested_sort
+        results = results.order_by(*requested_sort)
+        output["filters_are_applied"] = True
+
+    output["all_categories"] = [item.category for item in AhciCategory.objects.all()]
+    output["all_years"] = ['2011', '2012', '2013', '2014', '2015']
+
+    paginate(request, results, output)
+
+    print(output.keys())
+
     return render(request, "table/ahci.html", output)
 
 
 def erih(request):
     output = {}
 
-    requested_page = output["requested_page"] = 1
-    results_start = 0
-    results_end = number_of_results = 100
-
     results = Erih.objects
-    copy_of_GET = request.GET.copy()
-
-    if request.GET.get("results"):
-        number_of_results = int(request.GET.get("results"))
-
-    if number_of_results != 100:
-        output["number_of_results"] = number_of_results
-
-    if request.GET.get("page"):
-        requested_page = int(request.GET.get("page"))
-        output["requested_page"] = requested_page
-
-        # Update results range based on the current page
-        results_start = number_of_results * (requested_page - 1)
-        results_end = number_of_results * requested_page
-        copy_of_GET.pop("page")
 
     if request.GET.get("search"):
         searched_string = request.GET.get("search")
@@ -200,52 +188,8 @@ def erih(request):
         "Religious Studies and Theology",
     ]
     output["all_categories"] = ["NAT", "INT1", "INT2"]
-    output["data"] = results.all()[results_start:results_end]
-    output["total_results"] = f"{results.count():,}"
-    total_pages = results.count() // number_of_results + 1
-    output["total_pages"] = total_pages
 
-    generated_pages = range(requested_page - 2, requested_page + 3)  # General case
-
-    # This block must be after total_pages variable
-    if requested_page < 3:  # First two pages
-        if total_pages > 5:
-            generated_pages = range(1, 6)
-        else:
-            generated_pages = range(1, total_pages + 1)
-
-    elif requested_page > total_pages - 2:  # Last two pages
-        if total_pages > 5:
-            generated_pages = range(total_pages - 4, total_pages + 1)
-        else:
-            generated_pages = range(1, total_pages + 1)
-
-    # We create page links
-    links = []
-
-    # This block must be after the above one
-    for number in generated_pages:
-        copy_of_GET.update({"page": number})  # Unfortunately, page query will be placed at the end
-        links.append("?" + copy_of_GET.urlencode())
-        copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": 1})
-    output["first_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": total_pages})
-    output["last_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": requested_page + 1})
-    output["next_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": requested_page - 1})
-    output["previous_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    output["pages_links"] = zip(generated_pages, links)
+    paginate(request, results, output)
 
     return render(request, "table/erih.html", output)
 
@@ -253,27 +197,7 @@ def erih(request):
 def jcr_scores(request):
     output = {}
 
-    requested_page = output["requested_page"] = 1
-    results_start = 0
-    results_end = number_of_results = 100
-
     results = JcrScore.objects
-    copy_of_GET = request.GET.copy()
-
-    if request.GET.get("results"):
-        number_of_results = int(request.GET.get("results"))
-
-    if number_of_results != 100:
-        output["number_of_results"] = number_of_results
-
-    if request.GET.get("page"):
-        requested_page = int(request.GET.get("page"))
-        output["requested_page"] = requested_page
-
-        # Update results range based on the current page
-        results_start = number_of_results * (requested_page - 1)
-        results_end = number_of_results * requested_page
-        copy_of_GET.pop("page")
 
     if request.GET.get("search"):
         searched_string = request.GET.get("search")
@@ -331,52 +255,8 @@ def jcr_scores(request):
         output["filters_are_applied"] = True
 
     output["all_years"] = ["2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019"]
-    output["data"] = results.all()[results_start:results_end]
-    output["total_results"] = f"{results.count():,}"
-    total_pages = results.count() // number_of_results + 1
-    output["total_pages"] = total_pages
 
-    generated_pages = range(requested_page - 2, requested_page + 3)  # General case
-
-    # This block must be after total_pages variable
-    if requested_page < 3:  # First two pages
-        if total_pages > 5:
-            generated_pages = range(1, 6)
-        else:
-            generated_pages = range(1, total_pages + 1)
-
-    elif requested_page > total_pages - 2:  # Last two pages
-        if total_pages > 5:
-            generated_pages = range(total_pages - 4, total_pages + 1)
-        else:
-            generated_pages = range(1, total_pages + 1)
-
-    # We create page links
-    links = []
-
-    # This block must be after the above one
-    for number in generated_pages:
-        copy_of_GET.update({"page": number})  # Unfortunately, page query will be placed at the end
-        links.append("?" + copy_of_GET.urlencode())
-        copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": 1})
-    output["first_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": total_pages})
-    output["last_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": requested_page + 1})
-    output["next_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": requested_page - 1})
-    output["previous_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    output["pages_links"] = zip(generated_pages, links)
+    paginate(request, results, output)
 
     return render(request, "table/jcr_scores.html", output)
 
@@ -384,27 +264,7 @@ def jcr_scores(request):
 def jcr_scores_more(request):
     output = {}
 
-    requested_page = output["requested_page"] = 1
-    results_start = 0
-    results_end = number_of_results = 100
-
     results = JcrScoreMore.objects
-    copy_of_GET = request.GET.copy()
-
-    if request.GET.get("results"):
-        number_of_results = int(request.GET.get("results"))
-
-    if number_of_results != 100:
-        output["number_of_results"] = number_of_results
-
-    if request.GET.get("page"):
-        requested_page = int(request.GET.get("page"))
-        output["requested_page"] = requested_page
-
-        # Update results range based on the current page
-        results_start = number_of_results * (requested_page - 1)
-        results_end = number_of_results * requested_page
-        copy_of_GET.pop("page")
 
     if request.GET.get("search"):
         searched_string = request.GET.get("search")
@@ -464,52 +324,8 @@ def jcr_scores_more(request):
     output["all_years"] = ["2012", "2013", "2018", "2019"]
     output["all_quartiles"] = ['1','2','3','4']
     output["all_indexes"] = ["SCIE", "SSCI"]
-    output["data"] = results.all()[results_start:results_end]
-    output["total_results"] = f"{results.count():,}"
-    total_pages = results.count() // number_of_results + 1
-    output["total_pages"] = total_pages
 
-    generated_pages = range(requested_page - 2, requested_page + 3)  # General case
-
-    # This block must be after total_pages variable
-    if requested_page < 3:  # First two pages
-        if total_pages > 5:
-            generated_pages = range(1, 6)
-        else:
-            generated_pages = range(1, total_pages + 1)
-
-    elif requested_page > total_pages - 2:  # Last two pages
-        if total_pages > 5:
-            generated_pages = range(total_pages - 4, total_pages + 1)
-        else:
-            generated_pages = range(1, total_pages + 1)
-
-    # We create page links
-    links = []
-
-    # This block must be after the above one
-    for number in generated_pages:
-        copy_of_GET.update({"page": number})  # Unfortunately, page query will be placed at the end
-        links.append("?" + copy_of_GET.urlencode())
-        copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": 1})
-    output["first_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": total_pages})
-    output["last_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": requested_page + 1})
-    output["next_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": requested_page - 1})
-    output["previous_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    output["pages_links"] = zip(generated_pages, links)
+    paginate(request, results, output)
 
     # Tema
     # output["filters_are_applied"] = "category" in request.GET or "year" in request.GET or "quartile" in request.GET or "index" in request.GET or "sort" in request.GET
@@ -520,27 +336,7 @@ def jcr_scores_more(request):
 def jcr_groups(request):
     output = {}
 
-    requested_page = output["requested_page"] = 1
-    results_start = 0
-    results_end = number_of_results = 100
-
     results = JcrGroup.objects
-    copy_of_GET = request.GET.copy()
-
-    if request.GET.get("results"):
-        number_of_results = int(request.GET.get("results"))
-
-    if number_of_results != 100:
-        output["number_of_results"] = number_of_results
-
-    if request.GET.get("page"):
-        requested_page = int(request.GET.get("page"))
-        output["requested_page"] = requested_page
-
-        # Update results range based on the current page
-        results_start = number_of_results * (requested_page - 1)
-        results_end = number_of_results * requested_page
-        copy_of_GET.pop("page")
 
     if request.GET.get("search"):
         searched_string = request.GET.get("search")
@@ -596,52 +392,8 @@ def jcr_groups(request):
     output["all_categories"] = [item.category for item in JcrCategory.objects.all()]
     output["all_zones"] = ['1','2','3']
     output["all_years"] = ["2015", "2016", "2017", "2018", "2019"]
-    output["data"] = results.all()[results_start:results_end]
-    output["total_results"] = f"{results.count():,}"
-    total_pages = results.count() // number_of_results + 1
-    output["total_pages"] = total_pages
 
-    generated_pages = range(requested_page - 2, requested_page + 3)  # General case
-
-    # This block must be after total_pages variable
-    if requested_page < 3:  # First two pages
-        if total_pages > 5:
-            generated_pages = range(1, 6)
-        else:
-            generated_pages = range(1, total_pages + 1)
-
-    elif requested_page > total_pages - 2:  # Last two pages
-        if total_pages > 5:
-            generated_pages = range(total_pages - 4, total_pages + 1)
-        else:
-            generated_pages = range(1, total_pages + 1)
-
-    # We create page links
-    links = []
-
-    # This block must be after the above one
-    for number in generated_pages:
-        copy_of_GET.update({"page": number})  # Unfortunately, page query will be placed at the end
-        links.append("?" + copy_of_GET.urlencode())
-        copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": 1})
-    output["first_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": total_pages})
-    output["last_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": requested_page + 1})
-    output["next_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    copy_of_GET.update({"page": requested_page - 1})
-    output["previous_page"] = "?" + copy_of_GET.urlencode()
-    copy_of_GET.pop("page")
-
-    output["pages_links"] = zip(generated_pages, links)
+    paginate(request, results, output)
 
     return render(request, "table/jcr_groups.html", output)
 
